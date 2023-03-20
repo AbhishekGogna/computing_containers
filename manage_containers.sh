@@ -1,6 +1,6 @@
 #!/bin/bash
 container_name=$2
-pathset=$3 # takes the second argument to be the bindings for the container
+paths=$3 # takes the second argument to be the bindings for the container
 
 ##todo: resolve paths
 set -o pipefail # controls script behaviour
@@ -8,13 +8,26 @@ set -o pipefail # controls script behaviour
 ## Define variables
 containerdir=$PWD
 thisdir=$PWD
+admin_scr="${PWD}/make_dirs.py"
 container="${containerdir}/${container_name}"
 address=127.0.0.1
 port_max=8100
 port_min=8000
 port="$(comm -23 <(seq "${port_min}" "${port_max}" | sort) <(ss -Htan | awk "{print $4}" | cut -d":" -f2 | sort -u) | shuf | head -n 1)"
 ### switch for cuda
-if [[ -d  "/opt/Bio/cuda-toolkit/11.6/bin" ]]; then	cuda_lib="True"; fi
+if [[ -d  "/opt/Bio/cuda-toolkit/11.6/bin" ]]
+then	
+	cuda_lib=True 
+else 
+	cuda_lib=False
+fi
+### switch for pathset
+if [[ -z  "${paths}" ]]
+then 
+	pathset="False"
+else 
+	pathset="${paths}"
+fi
 
 # Define help
 help(){
@@ -44,7 +57,7 @@ EOF
 # Create instance
 start_instance(){
 	# put all variables in a json file
-	container_inputs=$(singularity exec -H "${thisdir}:/proj" "${container}" python3 /usr/local/src/make_dirs.py "${ide_type}" "${thisdir}" "${port}" "${pathset}" "${cuda_lib}")
+	container_inputs=$(singularity exec -H "${thisdir}:/proj" -B "${admin_scr}:/proj/make_dirs.py" "${container}" python3 /proj/make_dirs.py "${ide_type}" "${thisdir}" "${port}" "${pathset}" "${cuda_lib}")
 	
 	# define variables
 	ins_name=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.ins' ${container_inputs})
@@ -52,6 +65,7 @@ start_instance(){
 	bindings=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.bindings' ${container_inputs})
 	logs=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.log' ${container_inputs})
 	err=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.err' ${container_inputs})
+
 	# start instance
 	singularity instance start --nv \
 		--contain \
@@ -127,8 +141,8 @@ start_jupyter(){
 		2> "${err}") &
 
 	# process ide
-  	pid_jup=$!
-  	disown "${pid_jup}"
+  	pid_ins=$!
+  	disown "${pid_ins}"
   	set_pid
   	echo "Acess the jupyter instance - ${ins_name} at ${address}:${port}"
 }
