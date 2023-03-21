@@ -17,7 +17,9 @@ add_cuda=sys.argv[5]
 #pid_file
 
 # Define paths
-dirs_out = [f'/proj/{dir_type}/ins_{idx}/{x}' for x in ['data', 'config', 'tmp']]
+ins_name = f'ins_{dir_type}_{idx}'
+dirs_out = [f'/proj/{dir_type}/{ins_name}/{x}' for x in ['data', 'config', 'tmp']]
+default_lib_r = f'/proj/rst/R/x86_64-pc-linux-gnu-library/4.0'
 
 # Make paths absolute
 dirs_out_abs = [f'{this_dir}{re.sub("/proj", "", x)}' for x in dirs_out]
@@ -46,23 +48,30 @@ bindings_list = ','.join(bindings_all)
 
 # put database config for rst
 if dir_type == "rst":
+    # add databse config
     config_dir = [x for x in dirs_out if "config" in x][0]
     config_info = '''provider=sqlite
-directory=/proj/config
-'''
+directory={dir}
+'''.format(dir=config_dir)
     with open(f'{config_dir}/database.conf', 'w') as f:
         f.write(config_info)
     os.system(f'chmod +x {config_dir}/database.conf')
+    # add a default lib path
+    if not os.path.exists(default_lib_r):
+        os.makedirs(default_lib_r)
+    # add renviron at /proj 	# set environment variables #https://docs.posit.co/ide/desktop-pro/settings/settings.html and  https://rstats.wtf/r-startup.html
+    with open(f'/proj/.Renviron', 'w') as f:
+        f.write(f'R_LIBS_USER={default_lib_r}')
 
 # generate output
 output_list = {
-    "ins" : f'ins_{dir_type}_{idx}',
+    "ins" : ins_name,
     "tmp" : dirs_out_abs[2],
     "bindings" : bindings_list,
-    "log" : f'{this_dir}/{dir_type}/ins_{idx}/run.log',
-    "err": f'{this_dir}/{dir_type}/ins_{idx}/run.err'}
+    "log" : f'{this_dir}/{dir_type}/{ins_name}/run.log',
+    "err": f'{this_dir}/{dir_type}/{ins_name}/run.err'}
 
-container_input_path = f'/proj/{dir_type}/ins_{idx}/container_inputs.json'
+container_input_path = f'/proj/{dir_type}/{ins_name}/container_inputs.json'
 container_input_path_abs = re.sub("/proj", "", container_input_path)
 
 with open(container_input_path, 'w') as json_file:
