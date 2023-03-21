@@ -76,6 +76,7 @@ else
   exit 1
 fi
 EOF
+  chmod +x ${SINGULARITY_ROOTFS}/usr/lib/rstudio-server/bin/rstudio_auth
 
   # Add rstudio to path
   ln -fs /usr/lib/rstudio-server/bin/rstudio-server /usr/local/bin

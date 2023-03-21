@@ -7,9 +7,9 @@ this_dir = sys.argv[2]
 date_str = date.today().strftime("%d_%m_%y")
 idx = f'{date_str}_{sys.argv[3]}'
 paths = sys.argv[4]
-if paths:
+if paths == "True":
     pathset=paths.split(',')
-else:
+elif paths == "False":
     pathset=None
 add_cuda=sys.argv[5]
 
@@ -29,7 +29,7 @@ for directory in dirs_out:
 
 # Add bindings
 ## default
-default_rst = ['/var/run', '/proj/config']
+default_rst = ['/var/run', '/etc/rstudio']
 default_jup = ['/usr/share/jupyter', '/tmp/jupyter']
 if dir_type == "rst":
     bindings = [f'{dirs_out_abs[x]}:{default_rst[x]}' for x in range(len(default_rst))]
