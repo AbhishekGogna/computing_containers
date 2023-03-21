@@ -13,13 +13,11 @@ elif paths == "False":
     pathset=None
 add_cuda=sys.argv[5]
 
-#log
-#pid_file
-
 # Define paths
 ins_name = f'ins_{dir_type}_{idx}'
 dirs_out = [f'/proj/{dir_type}/{ins_name}/{x}' for x in ['data', 'config', 'tmp']]
 default_lib_r = f'/proj/rst/R/x86_64-pc-linux-gnu-library/4.0'
+container_input_path = f'/proj/{dir_type}/{ins_name}/container_inputs.json'
 
 # Make paths absolute
 dirs_out_abs = [f'{this_dir}{re.sub("/proj", "", x)}' for x in dirs_out]
@@ -70,10 +68,6 @@ output_list = {
     "bindings" : bindings_list,
     "log" : f'{this_dir}/{dir_type}/{ins_name}/run.log',
     "err": f'{this_dir}/{dir_type}/{ins_name}/run.err'}
-
-container_input_path = f'/proj/{dir_type}/{ins_name}/container_inputs.json'
-container_input_path_abs = re.sub("/proj", "", container_input_path)
-
 with open(container_input_path, 'w') as json_file:
     json.dump(output_list, json_file)
 

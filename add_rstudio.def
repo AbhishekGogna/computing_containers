@@ -4,18 +4,6 @@ From: /home/abhi/Desktop/singularity/gpu_cont.sif
 %post
   # Install variables
   export RSTUDIO_VERSION=1.4.1717
-
-  # Unix packages
-  apt-get update
-  apt-get install -y --no-install-recommends \
-    ca-certificates \
-    wget \
-    curl \
-    gdebi-core \
-    git \
-    vim \
-    emacs-nox \
-    jq
   
   # Install pandoc
   curl -Ls \
@@ -93,13 +81,4 @@ EOF
   export PATH=/usr/lib/rstudio-server/bin${PATH:+:${PATH}}
 
 %test
-  #Test script to verify that the image is built and running correctly
-  #sudo singularity exec --writable \
-  #-W "$PWD/rstudio/tmp" \
-  #-H "$PWD:/proj/" \
-  #-B "$PWD/rstudio/run:/var/run" \
-  #-B "$PWD/rstudio/log:/var/log" \
-  #../Py_Jp_sandbox/ \
-  #rserver \
-  #--www-address 127.0.0.1 \
-  #--www-port 8889
+  # do some tests

@@ -20,26 +20,68 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
   apt-get -y install locales 
   apt-get install -y lsb-release
   apt-get install -y software-properties-common
-  apt-get install -y git
   echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
   locale-gen
   
-  # ubuntu essentials
+  # Get ubuntu essentials
+  UBUNTU_VERSION=$(lsb_release -sc)
+  READLINE_VERSION=8
+  if [ "${UBUNTU_VERSION}" == "bionic" ]; then
+      READLINE_VERSION=7
+  fi
   apt-get update -y
-  apt-get install -y wget
-  #apt-get install -y python3.8.10 # already comes loaded
-  apt-get install -y python3-pip 
-  apt-get install -y curl 
-  apt-get install -y python3.8-dev
-  apt-get install -y python3.8-venv
-  apt-get install -y libgraphviz-dev
-  apt-get install -y graphviz
-  apt-get install -y perl
-  apt-get install -y nano
-  apt-get install -y vim
-  apt-get install -y emacs
-  apt-get install -y openssh-client
-  apt-get install -y openssh-server
+  apt-get install -y --no-install-recommends \
+    automake \
+    bash-completion \
+    ca-certificates \
+    curl \
+    devscripts \
+    emacs \
+    emacs-nox \
+    file \
+    fonts-texgyre \
+    g++ \
+    gdebi-core \
+    gfortran \
+    git \
+    graphviz \
+    gsfonts \
+    jq \
+    libbz2-* \
+    libcurl4 \
+    libcurl4-openssl-dev \
+    libgdal-dev \
+    libgit2-dev \
+    libgraphviz-dev \
+    "libicu[0-9][0-9]" \
+    libjpeg-turbo* \
+    liblapack-dev \
+    liblzma* \
+    libpangocairo-* \
+    libpcre2* \
+    libpng16* \
+    "libreadline${READLINE_VERSION}" \
+    libssl-dev \
+    libtiff* \
+    libtool \
+    libudunits2-dev \
+    libxml2 \
+    libxml2-dev \
+    m4 \
+    make \
+    nano \
+    openssh-client \
+    openssh-server \
+    perl \
+    python3.8-dev \
+    python3.8-venv \
+    python3-pip \
+    unzip \
+    vim \
+    wget \
+    zip \
+    zlib1g \
+    zlib1g-dev
     
   # Install jupyter
   ## nodejs for jupyter
@@ -69,54 +111,8 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
   /usr/sbin/locale-gen --lang "${LANG}"
   /usr/sbin/update-locale --reset LANG="${LANG}"
   
-  UBUNTU_VERSION=$(lsb_release -sc)
-  
-  READLINE_VERSION=8
-  #if [ "${UBUNTU_VERSION}" == "bionic" ]; then
-  #    READLINE_VERSION=7
-  #fi
-  
-  ## install specific libraries
-  apt-get install -y --no-install-recommends \
-    bash-completion \
-    ca-certificates \
-    devscripts \
-    file \
-    fonts-texgyre \
-    g++ \
-    gfortran \
-    gsfonts \
-    libbz2-* \
-    libcurl4 \
-    libssl-dev \
-    libudunits2-dev \
-    libgdal-dev \
-    libxml2 \
-    libcurl4-openssl-dev \
-    libtool \
-    m4 \
-    automake \
-    libgit2-dev \
-    "libicu[0-9][0-9]" \
-    liblapack-dev \
-    libpcre2* \
-    libjpeg-turbo* \
-    libpangocairo-* \
-    libpng16* \
-    "libreadline${READLINE_VERSION}" \
-    libtiff* \
-    liblzma* \
-    make \
-    unzip \
-    zip \
-    zlib1g \
-    openssh-client \
-    openssh-server \
-    wget
-  
-  # List of dependencies will will get removed at the end of R installation  
-  BUILDDEPS="curl \
-      default-jdk \
+  ## List of dependencies will will get removed at the end of R installation  
+  BUILDDEPS="default-jdk \
       libbz2-dev \
       libcairo2-dev \
       libpango1.0-dev \
@@ -143,8 +139,7 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
       x11proto-core-dev \
       xauth \
       xfonts-base \
-      xvfb \
-      zlib1g-dev"
+      xvfb"
     
   apt-get install -y --no-install-recommends ${BUILDDEPS}
   
@@ -206,6 +201,14 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
   rm -rf /var/lib/apt/lists/*
   apt-get clean -y
   
+  # Add user defined scripts to container
+  cp_container(){
+    # the first argument is script path including the script
+    # the second argument is script name
+    install -Dv "$1" "${SINGULARITY_ROOTFS}/usr/lib/container_commands/$2"
+  }
+  cp_container "${PWD}/makr_dirs.py" "make_dirs.py"
+
 %environment
   #Add CUDA paths
   PATH=/usr/local/cuda-11.6/bin${PATH:+:${PATH}}
