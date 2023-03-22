@@ -8,7 +8,7 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
   #Runs on host. The path to the image is $SINGULARITY_ROOTFS
   #To access the instance running on the host port_2 you need a ssh tunnel from your local pc recieving data at port_1. 
   #Windows - ssh -L -N "localhost:port_1:localhost:port_2" user@host_name
-  # build command - sudo singularity build cc_jup.sif cc_jup.def > run_his/cc_jup.err 2> run_his/cc_jup.log
+  # build command - sudo singularity build containers/cc_jup.sif cc_jup.def > run_his/cc_jup.err 2> run_his/cc_jup.log
 
   #make project directory
   mkdir -p /proj
