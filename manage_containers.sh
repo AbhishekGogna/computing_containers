@@ -17,10 +17,11 @@ port="$(comm -23 <(seq "${port_min}" "${port_max}" | sort) <(ss -Htan | awk "{pr
 ### switch for cuda
 if [[ -d  "/opt/Bio/cuda-toolkit/11.6/bin" ]]
 then	
-	cuda_lib=True 
+	cuda_lib="True"
 else 
-	cuda_lib=False
+	cuda_lib="False"
 fi
+
 ### switch for pathset
 if [[ -z  "${paths}" ]]
 then 
@@ -57,7 +58,7 @@ EOF
 # Create instance
 start_instance(){
 	# put all variables in a json file
-	container_inputs=$(singularity exec -H "${thisdir}:/proj" -B "${admin_scr}:/proj/make_dirs.py" "${container}" python3 /proj/make_dirs.py "${ide_type}" "${thisdir}" "${port}" "${pathset}" "${cuda_lib}")
+	container_inputs=$(singularity exec -H "${thisdir}:/proj" "${container}" python3 /usr/lib/usr_scr/make_dirs.py "${ide_type}" "${thisdir}" "${port}" "${pathset}" "${cuda_lib}")
 	
 	# define variables
 	ins_name=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.ins' ${container_inputs})

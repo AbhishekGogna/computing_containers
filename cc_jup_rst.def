@@ -1,0 +1,91 @@
+Bootstrap: localimage
+From: /home/abhi/Desktop/computing_containers/cc_jup.sif
+
+%setup
+# run script -sudo singularity build cc_jup_rst.sif cc_jup_rst.def > run_his/cc_jup_rst.err 2> run_his/cc_jup_rst.log
+
+%post
+  # Install variables
+  export RSTUDIO_VERSION=1.4.1717
+  
+  apt-get update -y
+  apt-get install -y --no-install-recommends psmisc
+
+
+  # Install pandoc
+  curl -Ls \
+  	"https://github.com/jgm/pandoc/releases/download/3.1.1/pandoc-3.1.1-1-amd64.deb" \
+  	--output /tmp/pandoc.deb
+  gdebi -n -q /tmp/pandoc.deb
+  
+  # Install quarto
+  curl -Ls \
+  	"https://quarto.org/download/latest/quarto-linux-amd64.deb" \
+  	--output /tmp/quatro.deb
+  gdebi -n -q /tmp/quatro.deb
+
+  # Install rstudio
+  curl -Ls \
+  	"https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb" \
+  	--output /tmp/rstudio_server.deb
+  gdebi -n -q /tmp/rstudio_server.deb
+  
+  # Add environment variables
+  echo "OMP_NUM_THREADS=1" >> /usr/local/lib/R/etc/Renviron.site
+  
+  # Add auth file
+  cat <<EOF >>  ${SINGULARITY_ROOTFS}/usr/lib/rstudio-server/bin/rstudio_auth
+#!/usr/bin/env bash
+
+if [ "\${DEBUG_AUTH_FILE}" = true ] ; then
+        set -x
+        set
+        exec 2> /proj/auth.log
+        exec > /proj/auth.log
+        echo "i am alive and well"
+fi
+
+# Confirm username is supplied
+if [[ \$# -lt 1 ]]; then
+  echo "Usage: auth USERNAME"
+  exit 1
+fi
+USERNAME="\${1}"
+
+# Confirm password environment variable exists
+if [[ -z "\${RSTUDIO_PASSWORD}" ]]; then
+  echo "The environment variable RSTUDIO_PASSWORD is not set"
+  exit 1
+fi
+
+# Read in the password from user
+read -s -p "Password: " PASSWORD
+echo ""
+
+# Authenticate user
+if [[ "\${USER}" == "\${USERNAME}" && "\${PASSWORD}" == "\${RSTUDIO_PASSWORD}" ]]; then
+  echo "Successful authentication"
+  exit 0
+else
+  echo "Invalid authentication"
+  exit 1
+fi
+EOF
+  chmod +x ${SINGULARITY_ROOTFS}/usr/lib/rstudio-server/bin/rstudio_auth
+
+  # Add rstudio to path
+  ln -fs /usr/lib/rstudio-server/bin/rstudio-server /usr/local/bin
+  ln -fs /usr/lib/rstudio-server/bin/rserver /usr/local/bin
+  
+  # clean up
+  rm -rf /tmp/*.deb /var/lib/apt/lists/* /var/lib/apt/* /var/cache/apt/*
+  apt-get autoremove -y
+  apt-get autoclean -y
+  apt-get clean -y
+  
+%environment
+  # Add Path
+  export PATH=/usr/lib/rstudio-server/bin${PATH:+:${PATH}}
+
+%test
+  # do some tests
