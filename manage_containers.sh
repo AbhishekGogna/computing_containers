@@ -69,7 +69,7 @@ start_instance(){
 	# start instance
 	singularity instance start --nv \
 		--contain \
-		-W "${tmp_dir/"/tmp"/""}" \
+		-W "${tmp_dir}" \
 		-H "${thisdir}:/proj" \
 		-B "${bindings}" \
 		"${container}" \
@@ -113,7 +113,7 @@ start_rstudio(){
         --auth-none 0 \
 		--server-user "${USER}" \
         --auth-pam-helper "rstudio_auth" \
-		--database-config-file "/proj/config/database.conf" \
+		--database-config-file "/etc/rstudio/database.conf" \
 		> "${logs}" \
 		2> "${err}") &
 	

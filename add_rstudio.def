@@ -4,18 +4,6 @@ From: /home/abhi/Desktop/computing_containers/gpu_cont.sif
 %post
   # Install variables
   export RSTUDIO_VERSION=1.4.1717
-
-  # Unix packages
-  apt-get update
-  apt-get install -y --no-install-recommends \
-    ca-certificates \
-    wget \
-    curl \
-    gdebi-core \
-    git \
-    vim \
-    emacs-nox \
-    jq
   
   # Install pandoc
   curl -Ls \
@@ -76,6 +64,7 @@ else
   exit 1
 fi
 EOF
+  chmod +x ${SINGULARITY_ROOTFS}/usr/lib/rstudio-server/bin/rstudio_auth
 
   # Add rstudio to path
   ln -fs /usr/lib/rstudio-server/bin/rstudio-server /usr/local/bin
@@ -92,4 +81,4 @@ EOF
   export PATH=/usr/lib/rstudio-server/bin${PATH:+:${PATH}}
 
 %test
-  # Think of a test and add it here
+  # do some tests
