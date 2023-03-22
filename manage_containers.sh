@@ -6,9 +6,8 @@ paths=$3 # takes the second argument to be the bindings for the container
 set -o pipefail # controls script behaviour
 
 ## Define variables
-containerdir=$PWD
 thisdir=$PWD
-admin_scr="${PWD}/make_dirs.py"
+containerdir="${thisdir}/containers"
 container="${containerdir}/${container_name}"
 address=127.0.0.1
 port_max=8100
