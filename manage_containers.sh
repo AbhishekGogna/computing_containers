@@ -134,8 +134,8 @@ start_jupyter(){
  		--pwd "/proj/" \
  		"instance://${ins_name}" \
  		jupyter lab \
-        --ip=${address} \
-        --port=${port} \
+        --ip="${address}" \
+        --port="${port}" \
 		--ServerApp.root_dir="/proj/" \
 		> "${logs}" \
 		2> "${err}") &
