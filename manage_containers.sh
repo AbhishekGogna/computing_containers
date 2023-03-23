@@ -1,12 +1,12 @@
 #!/bin/bash
-container_name=$2
-paths=$3 # takes the second argument to be the bindings for the container
+container_name="$2"
+paths="$3" # takes the second argument to be the bindings for the container
 
 ##todo: resolve paths
 set -o pipefail # controls script behaviour
 
 ## Define variables
-thisdir=$PWD
+thisdir="$PWD"
 containerdir="${thisdir}/containers"
 container="${containerdir}/${container_name}"
 address=127.0.0.1
@@ -60,11 +60,11 @@ start_instance(){
 	container_inputs=$(singularity exec -H "${thisdir}:/proj" "${container}" python3 /usr/lib/usr_scr/make_dirs.py "${ide_type}" "${thisdir}" "${port}" "${pathset}" "${cuda_lib}")
 	
 	# define variables
-	ins_name=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.ins' ${container_inputs})
-	tmp_dir=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.tmp' ${container_inputs})
-	bindings=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.bindings' ${container_inputs})
-	logs=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.log' ${container_inputs})
-	err=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.err' ${container_inputs})
+	ins_name=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.ins' "${container_inputs}")
+	tmp_dir=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.tmp' "${container_inputs}")
+	bindings=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.bindings' "${container_inputs}")
+	logs=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.log' "${container_inputs}")
+	err=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.err' "${container_inputs}")
 
 	# start instance
 	singularity instance start --nv \
@@ -91,7 +91,6 @@ set_pid(){
 ${pid_ins}
 ${ins_name}
 ${address}:${port}
-${hostname}
 EOF
 }
 
