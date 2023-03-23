@@ -7,10 +7,13 @@ From: /home/abhi/Desktop/computing_containers/containers/cc_jup.sif
 %post
   # Install variables
   export RSTUDIO_VERSION=1.4.1717
-  
+  export DEBIAN_FRONTEND=noninteractive
+  # Install libraries needed for R packages
   apt-get update -y
-  apt-get install -y --no-install-recommends psmisc
-
+  apt-get install -y --no-install-recommends \
+  libcurl4-openssl-dev \
+  libssl-dev \
+  libxml2-dev
 
   # Install pandoc
   curl -Ls \

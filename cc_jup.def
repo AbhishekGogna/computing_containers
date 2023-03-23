@@ -27,10 +27,19 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
   cp_container "install_pkgs.R"
 
 %post
-  # Update apt and get some core packages
+  # Define variables
   export DEBIAN_FRONTEND=noninteractive
+  export TZ="Europe/Berlin"
+  export R_VERSION="4.0.5"
+  export CRAN="https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
+  export LANG="en_US.UTF-8"
+  export LC_ALL="en_US.UTF-8"
+  export TZ="Etc/UTC"
+  usr_scr_r="/usr/lib/usr_scr/install_pkgs.R" 
   total_cores="$(nproc)"
   available_cores="$(expr 2 + "${total_cores}" / 2)"
+
+  # Update apt and get some core packages
   apt-get update
   apt-get install -y \
     apt-utils \
@@ -102,7 +111,7 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
     zip \
     zlib1g \
     zlib1g-dev
-    
+
   # Install jupyter
   ## nodejs for jupyter
   curl -fsSL https://deb.nodesource.com/setup_18.x -o /tmp/node_js.sh
@@ -119,15 +128,6 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
   mkdir -p /usr/share/jupyter/runtime
   
   # Install R
-  export TZ="Europe/Berlin"
-  export R_VERSION="4.0.5"
-  export CRAN="https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
-  export LANG="en_US.UTF-8"
-  export LC_ALL="en_US.UTF-8"
-  export TZ="Etc/UTC"
-  usr_scr_r="/usr/lib/usr_scr/install_pkgs.R" 
-  # needed for integrating Jupyter with R
-
   ## Configure default locale
   LANG=${LANG:-"en_US.UTF-8"}
   /usr/sbin/locale-gen --lang "${LANG}"
