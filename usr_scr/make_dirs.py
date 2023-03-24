@@ -24,7 +24,7 @@ dirs_out_abs = [f'{this_dir}{re.sub("/proj", "", x)}' for x in dirs_out]
 
 # Produce directories
 for directory in dirs_out:
-    if not os.path.exists(directory):
+    if not os.path.exists(directory): 
         os.makedirs(directory)
 
 # Add bindings
@@ -35,6 +35,7 @@ if dir_type == "rst":
     bindings = [f'{dirs_out_abs[x]}:{default_rst[x]}' for x in range(len(default_rst))]
 elif dir_type == "jup":
     bindings = [f'{dirs_out_abs[x]}:{default_jup[x]}' for x in range(len(default_jup))]
+    bindings = [x.replace(f'{dir_type}/{ins_name}/config', f'{dir_type}/config') for x in bindings] # puts jupyter config file in a folder outside ins folder
     if add_cuda == "True":
         bindings = bindings + ['/opt/Bio/cuda-toolkit/11.6/bin:/usr/local/cuda-11.6/bin']
 ## user defined
