@@ -156,6 +156,15 @@ list_ins(){
 stop_ins(){
   	ins_name=$1
   	singularity instance stop "${ins_name}"
+	if [[ "$1" == *"rst"* ]]
+	then
+		rm -rf "${thisdir}/rst/${1}"
+	elif [[ "$1" == *"jup"* ]]
+	then
+		rm -rf "${thisdir}/jup/${1}"
+	else
+		echo "tmp dir was not deleted. please check."
+	fi
 }
 
 if [ "$#" = 0 ]; then
