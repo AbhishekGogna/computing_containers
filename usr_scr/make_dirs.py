@@ -7,11 +7,13 @@ this_dir = sys.argv[2]
 date_str = date.today().strftime("%d_%m_%y")
 idx = f'{date_str}_{sys.argv[3]}'
 paths = sys.argv[4]
-if paths == "True":
-    pathset=paths.split(',')
-elif paths == "False":
+if paths == "False":
     pathset=None
+else:
+    pathset=paths.split(',')
 add_cuda=sys.argv[5]
+
+print(pathset)
 
 # Define paths
 ins_name = f'ins_{dir_type}_{idx}'
