@@ -196,4 +196,7 @@ case $cmd in
   	stop_ins "$@"
   ;;
   help) help
+  ;;
+  *) help
+  ;;
 esac
