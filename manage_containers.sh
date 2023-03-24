@@ -148,7 +148,7 @@ start_jupyter(){
 
 # list running instance
 list_ins(){
-	instances=$(singularity instance list -j | jq '.instances[]')
+	instances=$(singularity instance list -j | jq -r '.instances[] | [.instance, .pid] | @tsv')
 	echo "${instances}"
 }
 
