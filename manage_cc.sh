@@ -190,7 +190,7 @@ stop_ins(){
 if [ "$#" = 0 ]; then
   echo ""
   echo "This script needs some argument to work."
-  echo "Plear run ./rstudio_me help to see the usage tips"
+  echo "Plear run ./manage_cc.sh help to see the usage tips"
   echo ""
   exit 1
 else
