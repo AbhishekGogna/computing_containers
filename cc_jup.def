@@ -1,21 +1,14 @@
-Bootstrap: docker
-From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
+Bootstrap: localimage
+From: /home/abhi/Desktop/computing_containers/containers/cc_base.sif
 
 %help
-  #baseimage from - https://gitlab.com/nvidia/container-images/cuda/-/blob/master/dist/11.6.0/ubuntu2004/runtime/cudnn8/Dockerfile
   #jupyter connection from - https://github.com/saagie/jupyter-r-notebook/blob/master/Dockerfile
 %setup
   #Runs on host. The path to the image is $SINGULARITY_ROOTFS
   #To access the instance running on the host port_2 you need a ssh tunnel from your local pc recieving data at port_1. 
   #Windows - ssh -L -N "localhost:port_1:localhost:port_2" user@host_name
   # build command - sudo singularity build containers/cc_jup.sif cc_jup.def > run_his/cc_jup.err 2> run_his/cc_jup.log
-
-  #make project directory
-  mkdir -p /proj
-
-  # Add user defined scripts to container
   cp_container(){
-
     if [ -f   "usr_scr/${1}" ]; then
       install -Dv "usr_scr/${1}" "${SINGULARITY_ROOTFS}/usr/lib/usr_scr/$1"
     else
@@ -24,93 +17,8 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
     fi
   }
   cp_container "make_dirs.py"
-  cp_container "install_pkgs.R"
 
 %post
-  # Define variables
-  export DEBIAN_FRONTEND=noninteractive
-  export TZ="Europe/Berlin"
-  export R_VERSION="4.0.5"
-  export CRAN="https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
-  export LANG="en_US.UTF-8"
-  export LC_ALL="en_US.UTF-8"
-  export TZ="Etc/UTC"
-  usr_scr_r="/usr/lib/usr_scr/install_pkgs.R" 
-  total_cores="$(nproc)"
-  available_cores="$(expr 2 + "${total_cores}" / 2)"
-
-  # Update apt and get some core packages
-  apt-get update
-  apt-get install -y \
-    apt-utils \
-    locales \
-    lsb-release \
-    software-properties-common
-
-  echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-  locale-gen
-  
-  # Get ubuntu essentials
-  UBUNTU_VERSION="$(lsb_release -sc)"
-  READLINE_VERSION=8
-  if [ "${UBUNTU_VERSION}" -eq "bionic" ]; then
-      READLINE_VERSION=7
-      exit 1
-  fi
-  apt-get update -y
-  apt-get install -y --no-install-recommends \
-    automake \
-    bash-completion \
-    ca-certificates \
-    curl \
-    devscripts \
-    emacs \
-    emacs-nox \
-    file \
-    fonts-texgyre \
-    g++ \
-    gdebi-core \
-    gfortran \
-    git \
-    graphviz \
-    gsfonts \
-    jq \
-    libbz2-* \
-    libcurl4 \
-    libcurl4-openssl-dev \
-    libgdal-dev \
-    libgit2-dev \
-    libgraphviz-dev \
-    "libicu[0-9][0-9]" \
-    libjpeg-turbo* \
-    liblapack-dev \
-    liblzma* \
-    libpangocairo-* \
-    libpcre2* \
-    libpng16* \
-    "libreadline${READLINE_VERSION}" \
-    libssl-dev \
-    libtiff* \
-    libtool \
-    libudunits2-dev \
-    libxml2 \
-    libxml2-dev \
-    m4 \
-    make \
-    nano \
-    openssh-client \
-    openssh-server \
-    perl \
-    psmisc \
-    python3.8-dev \
-    python3.8-venv \
-    python3-pip \
-    unzip \
-    vim \
-    wget \
-    zip \
-    zlib1g \
-    zlib1g-dev
 
   # Install jupyter
   ## nodejs for jupyter
@@ -127,132 +35,24 @@ From: nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
   mkdir -p /usr/share/jupyter/data
   mkdir -p /usr/share/jupyter/runtime
   
-  # Install R
-  ## Configure default locale
-  LANG=${LANG:-"en_US.UTF-8"}
-  /usr/sbin/locale-gen --lang "${LANG}"
-  /usr/sbin/update-locale --reset LANG="${LANG}"
-  
-  ## List of dependencies will will get removed at the end of R installation  
-  BUILDDEPS="default-jdk \
-      libbz2-dev \
-      libcairo2-dev \
-      libpango1.0-dev \
-      libjpeg-dev \
-      libicu-dev \
-      libpcre2-dev \
-      libpng-dev \
-      libreadline-dev \
-      libtiff5-dev \
-      liblzma-dev \
-      libx11-dev \
-      libxt-dev \
-      rsync \
-      subversion \
-      tcl-dev \
-      tk-dev \
-      texinfo \
-      texlive-extra-utils \
-      texlive-fonts-recommended \
-      texlive-fonts-extra \
-      texlive-latex-recommended \
-      texlive-latex-extra \
-      x11proto-core-dev \
-      xauth \
-      xfonts-base \
-      xvfb"
-    
-  apt-get install -y --no-install-recommends ${BUILDDEPS}
-  
-  ## Download R from 0-Cloud CRAN mirror or CRAN
-  download_r_src() {
-      wget -q "https://cloud.r-project.org/src/$1" -O "R.tar.gz" ||
-          wget -q "https://cran.r-project.org/src/$1" -O "R.tar.gz"
-  }
-  download_r_src "base/R-${R_VERSION%%.*}/R-${R_VERSION}.tar.gz"
-  
-  ## Extract tarball and enter into it
-  tar xzf "R.tar.gz"
-  cd R-*/
-  
-  ## Configure R
-  R_PAPERSIZE=letter \
-    R_BATCHSAVE="--no-save --no-restore" \
-    R_BROWSER=xdg-open \
-    PAGER=/usr/bin/pager \
-    PERL=/usr/bin/perl \
-    R_UNZIPCMD=/usr/bin/unzip \
-    R_ZIPCMD=/usr/bin/zip \
-    R_PRINTCMD=/usr/bin/lpr \
-    LIBnn=lib \
-    AWK=/usr/bin/awk \
-    CFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g" \
-    CXXFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g" \
-    ./configure --enable-R-shlib \
-    --enable-memory-profiling \
-    --enable-BLAS-shlib \
-    --with-readline \
-    --with-tcltk \
-    --with-lapack \
-    --with-recommended-packages
-  
-  ## Install R  
-  make -j "${available_cores}"
-  make install
-  make clean
-  
-  ## Install packages to connect R with Jupyter
-  if [ -x "${usr_scr_r}" ]; then
-    Rscript "${usr_scr_r}" "${available_cores}"
-  else
-      echo "${usr_scr_r} either does not exist or has no execute permissions. R integration into jupyter was unsuccessful"
-      exit 1
-  fi
-  
-  ## Clean up from R source install
-  cd ..
-  rm -rf R-*/
-  rm -rf "R.tar.gz"
-  
   # Clean up general
-  apt-get remove --purge -y ${BUILDDEPS}
   apt-get autoremove -y
   apt-get autoclean -y
   rm -rf /var/lib/apt/lists/*
   apt-get clean -y
 
 %environment
-  #Add CUDA paths
-  PATH=/usr/local/cuda-11.6/bin${PATH:+:${PATH}}
-  LD_LIBRARY_PATH=/usr/local/cuda-11.6/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-  
   #Add jupyter paths
   export JUPYTER_DATA_DIR="/usr/share/jupyter/data"
   export JUPYTER_CONFIG_DIR="/tmp/jupyter"
   export JUPYTER_RUNTIME_DIR="/usr/share/jupyter/runtime"
-  
-  # Add R paths
-  export LC_ALL="en_US.UTF-8"
-  
-  # Add julia path
-  #PATH=/usr/local/julia/bin${PATH:+:${PATH}}
-  #export JULIA_DEPOT_PATH=/usr/local/julia/def_pkgs
 
 %runscript
   #Executes when the "singularity run" command is used
   #Useful when you want the container to run as an executable
-
-%apprun python3
-  exec python3 "${@}"
   
 %apprun jupyter
   exec jupyter "${@}"
-  
-%apprun R
-  exec R "${@}"
-  
-%apprun Rscript
-  exec Rscript "${@}"
 	
 %test
   #Test script to verify that the image is built and running correctly
