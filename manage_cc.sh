@@ -1,5 +1,5 @@
 #!/bin/bash
-## todo: expand following section to resolve all user commands at the top
+# todo: expand following section to resolve all user commands at the top
 set -o pipefail # controls script behaviour
 for ARGUMENT in "${@:2}" # fist place is reserved for the script command
 do
@@ -10,16 +10,17 @@ do
 	export "${KEY}"="${VALUE}"
 done #lets user specify variable names from command line input
 
-## Define variables
+# Define variables
 
-### For instance start
+## For instance : User custom 
 ext_lib_blas="/qg-10/data/AGR-QG/Gogna/computing_containers/OpenBLAS/inst/qg-10.ipk-gatersleben.de/lib/libopenblas.so"
 perm_bindings=""
-thisdir=$PWD
-
-#### For instance container
+usr_scr="${thisdir}/usr_scr"
+cc_dir="/home/abhi/Desktop/computing_containers/containers"
 def_cc="cc_jup_rst.sif"
-cc_dir="/home/abhi/Desktop/computing_containers"
+
+## For instance: Auto generated
+thisdir=$PWD
 if [[ -v cc ]]; then container="${cc_dir}/${cc}" ; else container="${cc_dir}/${def_cc}" ; fi
 
 ## For startup address
@@ -28,10 +29,10 @@ port_max=8100
 port_min=8000
 port="$(comm -23 <(seq "${port_min}" "${port_max}" | sort) <(ss -Htan | awk "{print $4}" | cut -d":" -f2 | sort -u) | shuf | head -n 1)"
 
-### switch for cuda
+## switch for cuda
 if [[ -d  "/opt/Bio/cuda-toolkit/11.6/bin" ]]; then	cuda_lib="True"; else	cuda_lib="False"; fi
 
-### switch for pathset
+## switch for pathset
 if [[ -z  "${paths}" ]]; then	pathset="False"; else	pathset="${paths}"; fi
 
 # Define help
@@ -64,7 +65,7 @@ EOF
 # Create instance
 start_instance(){
 	# put all variables in a json file
-	container_inputs=$(singularity exec -H "${thisdir}:/proj" "${container}" python3 /usr/lib/usr_scr/make_dirs.py "${ide_type}" "${thisdir}" "${port}" "${pathset}" "${cuda_lib}")
+	container_inputs=$(singularity exec -H "${thisdir}:/proj" -B "${usr_scr}/make_dirs.py:/usr/lib/usr_scr/make_dirs.py" "${container}" python3 /usr/lib/usr_scr/make_dirs.py "${ide_type}" "${thisdir}" "${port}" "${pathset}" "${cuda_lib}")
 	
 	# define variables
 	ins_name=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.ins' ${container_inputs})
@@ -85,7 +86,7 @@ start_instance(){
 		-W "${tmp_dir}" \
 		-H "${thisdir}:/proj" \
 		-B "${bindings}" \
-		-B "${cc_dir}/usr_scr/make_dirs.py:/usr/lib/usr_scr/make_dirs.py" \
+		-B "${usr_scr}/make_dirs.py:/usr/lib/usr_scr/make_dirs.py" \
 		"${container}" \
 		"${ins_name}"
 }
@@ -107,6 +108,18 @@ ${ins_name}
 ${address}:${port}
 ${tmp_dir}
 EOF
+}
+
+# Start Bash 
+start_bash(){
+	# start instance
+	start_instance
+
+	# start bash
+	singularity exec \
+		--pwd "/proj" \
+		"instance://${ins_name}" \
+		bash
 }
 
 # Start rstudio
@@ -201,13 +214,17 @@ fi
 case $cmd in
   start_rst)
   	ide_type="rst"
-	pid_info="${thisdir}/${ide_type}/${ide_type}.pid" # modify this to be universal
+	pid_info="${thisdir}/cc_data/${ide_type}/${ide_type}.pid" # modify this to be universal
   	start_rstudio "$@"
   ;;
   start_jup)
   	ide_type="jup"
-	pid_info="${thisdir}/${ide_type}/${ide_type}.pid" # modify this to be universal
+	pid_info="${thisdir}/cc_data/${ide_type}/${ide_type}.pid" # modify this to be universal
   	start_jupyter "$@"
+  ;;
+  start_bash)
+	ide_type="none"
+  	start_bash "$@"
   ;;
   list_ins) 
   	list_ins "$@"
