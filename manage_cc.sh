@@ -13,6 +13,7 @@ done #lets user specify variable names from command line input
 # Define variables
 
 ## For instance : User custom 
+thisdir=$PWD
 ext_lib_blas="/qg-10/data/AGR-QG/Gogna/computing_containers/OpenBLAS/inst/qg-10.ipk-gatersleben.de/lib/libopenblas.so"
 perm_bindings=""
 usr_scr="${thisdir}/usr_scr"
@@ -20,7 +21,6 @@ cc_dir="/home/abhi/Desktop/computing_containers/containers"
 def_cc="cc_jup_rst.sif"
 
 ## For instance: Auto generated
-thisdir=$PWD
 if [[ -v cc ]]; then container="${cc_dir}/${cc}" ; else container="${cc_dir}/${def_cc}" ; fi
 
 ## For startup address
@@ -114,12 +114,14 @@ EOF
 start_bash(){
 	# start instance
 	start_instance
+	echo "Acess the rstudio instance - ${ins_name} "
 
 	# start bash
 	singularity exec \
 		--pwd "/proj" \
 		"instance://${ins_name}" \
 		bash
+	
 }
 
 # Start rstudio
@@ -187,10 +189,13 @@ stop_ins(){
   		singularity instance stop "${ins}"
 		if [[ "$ins" == *"rst"* ]]		
 		then
-			rm -rf "${thisdir}/rst/${ins}"
+			rm -rf "${thisdir}/cc_data/rst/${ins}"
 		elif [[ "$ins" == *"jup"* ]]
 		then
-			rm -rf "${thisdir}/jup/${ins}"
+			rm -rf "${thisdir}/cc_data/jup/${ins}"
+		elif [[ "$ins" == *"bash"* ]]
+		then
+			rm -rf "${thisdir}/cc_data/bash_int/${ins}"
 		else
 			echo "tmp dir was not deleted. please check."
 		fi
