@@ -1,5 +1,5 @@
 #!/bin/bash
-# todo: expand following section to resolve all user commands at the top
+## todo: expand following section to resolve all user commands at the top
 set -o pipefail # controls script behaviour
 for ARGUMENT in "${@:2}" # fist place is reserved for the script command
 do
@@ -69,6 +69,7 @@ start_instance(){
 	
 	# define variables
 	ins_name=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.ins' ${container_inputs})
+	ins_port=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.port' ${container_inputs})
 	tmp_dir=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.tmp' ${container_inputs})
 	bindings=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.bindings' ${container_inputs})
 	logs=$(singularity exec -H "${thisdir}:/proj" "${container}" jq -r '.log' ${container_inputs})
@@ -105,7 +106,7 @@ set_pid(){
 	cat <<EOF >"${pid_info}"
 ${pid_ins}
 ${ins_name}
-${address}:${port}
+${address}:${ins_port}
 ${tmp_dir}
 EOF
 }
@@ -114,7 +115,7 @@ EOF
 start_bash(){
 	# start instance
 	start_instance
-	echo "Acess the rstudio instance - ${ins_name} "
+	echo "Close the instance with name - ${ins_name} "
 
 	# start bash
 	singularity exec \
@@ -138,7 +139,7 @@ start_rstudio(){
 		"instance://${ins_name}" \
 		rserver \
         --www-address "${address}" \
-        --www-port "${port}" \
+        --www-port "${ins_port}" \
         --auth-none 0 \
 		--server-user "${USER}" \
         --auth-pam-helper "rstudio_auth" \
@@ -150,7 +151,7 @@ start_rstudio(){
 	pid_ins=$!
 	disown "${pid_ins}"
   	set_pid
-  	echo "Acess the rstudio instance - ${ins_name} at ${address}:${port}"
+  	echo "Acess the rstudio instance - ${ins_name} at ${address}:${ins_port}"
 }
 
 # Create Jupyter
@@ -164,7 +165,7 @@ start_jupyter(){
  		"instance://${ins_name}" \
  		jupyter lab \
         --ip=${address} \
-        --port="${port}" \
+        --port="${ins_port}" \
 		--ServerApp.root_dir="/proj/" \
 		> "${logs}" \
 		2> "${err}") &
@@ -173,7 +174,7 @@ start_jupyter(){
   	pid_ins=$!
   	disown "${pid_ins}"
   	set_pid
-  	echo "Acess the jupyter instance - ${ins_name} at ${address}:${port}"
+  	echo "Acess the jupyter instance - ${ins_name} at ${address}:${ins_port}"
 }
 
 # list running instance
@@ -208,7 +209,7 @@ stop_ins(){
 if [ "$#" = 0 ]; then
   echo ""
   echo "This script needs some argument to work."
-  echo "Plear run ./manage_cc.sh help to see the usage tips"
+  echo "Plear run ./manage_cc help to see the usage tips"
   echo ""
   exit 1
 else

@@ -8,7 +8,7 @@ if dir_type == "none":
     dir_type = "bash_int"
 this_dir = sys.argv[2]
 date_str = date.today().strftime("%d_%m_%y")
-idx = f'{date_str}_{sys.argv[3]}'
+port = sys.argv[3]
 paths = sys.argv[4]
 if paths == "False":
     pathset=None
@@ -17,6 +17,7 @@ else:
 add_cuda=sys.argv[5]
 
 # Create common variables
+idx = f'{date_str}_{port}'
 ins_name = f'ins_{dir_type}_{idx}'
 cc_dest = "/proj"
 cc_data = f'{cc_dest}/cc_data' # all data created by this script goes inside here
@@ -99,6 +100,7 @@ else:
 # generate output
 output_list = {
     "ins" : ins_name,
+    "port" : port,
     "tmp" : tmp_dir_abs,
     "bindings" : bindings_list,
     "log" : f'{ins_dir_abs}/run.log',
