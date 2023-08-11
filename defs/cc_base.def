@@ -58,6 +58,7 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
   apt-get install -y --no-install-recommends \
     automake \
     bash-completion \
+    build-essentials \
     ca-certificates \
     curl \
     devscripts \
@@ -66,6 +67,7 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
     file \
     fonts-texgyre \
     g++ \
+    gcc \
     gdebi-core \
     gfortran \
     git \
@@ -86,6 +88,7 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
     libpcre2* \
     libpng16* \
     "libreadline${READLINE_VERSION}" \
+    libpq-dev \
     libssl-dev \
     libtiff* \
     libtool \
@@ -102,12 +105,13 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
     python3.8-dev \
     python3.8-venv \
     python3-pip \
+    python3-wheel \
     unzip \
     vim \
     wget \
     zip \
     zlib1g \
-    zlib1g-dev
+    zlib1g-devch
 
   # Install R
   ## Configure default locale
