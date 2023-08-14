@@ -17,8 +17,13 @@ From: /home/abhi/Desktop/computing_containers/containers/cc_base.sif
     fi
   }
   cp_container "make_dirs.py"
+  cp_container "install_pkgs.R"
 
 %post
+  # Define variables
+  usr_scr_r="/usr/lib/usr_scr/install_pkgs.R"
+  total_cores="$(nproc)"
+  available_cores="$(expr 2 + "${total_cores}" / 2)"
 
   # Install jupyter
   ## nodejs for jupyter
@@ -35,6 +40,14 @@ From: /home/abhi/Desktop/computing_containers/containers/cc_base.sif
   mkdir -p /usr/share/jupyter/data
   mkdir -p /usr/share/jupyter/runtime
   
+  ## Install additional packages to integrate R into jupyter
+  if [ -x "${usr_scr_r}" ]; then
+    Rscript "${usr_scr_r}" "${available_cores}"
+  else
+      echo "${usr_scr_r} either does not exist or has no execute permissions. Installing base pkgs was unsuccessful"
+      exit 1
+  fi
+
   # Clean up general
   apt-get autoremove -y
   apt-get autoclean -y

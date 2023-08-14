@@ -3,20 +3,12 @@ From: /home/abhi/Desktop/computing_containers/containers/cc_jup.sif
 
 %setup
 # run script -sudo singularity build containers/cc_jup_rst.sif cc_jup_rst.def > run_his/cc_jup_rst.err 2> run_his/cc_jup_rst.log
-  cp_container(){
-    if [ -f   "usr_scr/${1}" ]; then
-      install -Dv "usr_scr/${1}" "${SINGULARITY_ROOTFS}/usr/lib/usr_scr/$1"
-    else
-      echo "${1} does not exist. please ensure that ${1} is present inside /usr_scr at the same location as current definition file"
-      exit 1
-    fi
-  }
-  cp_container "install_pkgs_base.R"
   
 %post
   # Install variables
   export RSTUDIO_VERSION=1.4.1717
   export DEBIAN_FRONTEND=noninteractive
+ 
   # Install libraries needed for R packages
   apt-get update -y
   apt-get install -y --no-install-recommends \
