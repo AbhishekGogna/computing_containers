@@ -1,4 +1,13 @@
 #!/user/bin/python3
+import os, time
+from datetime import timedelta
+
+#start_time = time.time()
+
+needed_dirs = ['cc_data', 'containers', 'defs', 'run_his', 'usr_scr']
+for dir in needed_dirs:
+    if not os.path.exists(dir):
+        os.makedirs(dir, exist_ok=True)
 
 def task_build_cc_base():
     '''builds the base container with python and R programming languages'''
@@ -10,7 +19,8 @@ def task_build_cc_base():
 
     return {'file_dep': [f'{def_file}'],
             'targets': [f'{sif_file}'],
-            'actions': [f'sudo singularity build {sif_file} {def_file} > {err_at} 2> {log_at}']}
+            'actions': [f'sudo singularity build {sif_file} {def_file} > {err_at} 2> {log_at}']}    
+#print(f'task cc_base took {str(timedelta(seconds=(time.time() - start_time)))}')
 
 def task_build_cc_jup():
     '''Add jupyter IDE to base image'''
@@ -23,6 +33,7 @@ def task_build_cc_jup():
     return {'file_dep': [f'{def_file}', 'containers/cc_base.sif'],
             'targets': [f'{sif_file}'],
             'actions': [f'sudo singularity build {sif_file} {def_file} > {err_at} 2> {log_at}']}
+#print(f'task cc_jup took {str(timedelta(seconds=(time.time() - start_time)))}')
 
 def task_build_cc_jup_rst():
     '''upgrades the base container to add rstudio IDE'''
@@ -35,3 +46,4 @@ def task_build_cc_jup_rst():
     return {'file_dep': [f'{def_file}', 'containers/cc_jup.sif'],
             'targets': [f'{sif_file}'],
             'actions': [f'sudo singularity build {sif_file} {def_file} > {err_at} 2> {log_at}']}
+#print(f'task cc_jup_rst took {str(timedelta(seconds=(time.time() - start_time)))}')
