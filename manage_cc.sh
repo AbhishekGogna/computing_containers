@@ -43,8 +43,9 @@ Usage ./manage_cc task cc|ins="cc_*.sif|ins_*_28_03_23_*" paths="/path/outside:/
 Manage RStudio Server sessions in this folder.
 
 tasks:
-start_rst		Start a new RStudio server session.
-start_jup		Start a new Jupyter server session.
+start_rst		Start a new RStudio server session
+start_jup		Start a new Jupyter server session
+start_bash		Start a interactive bash terminal
 list_ins		List all running instances
 stop_ins		Stop running instance with a provided name
 
@@ -161,7 +162,7 @@ start_jupyter(){
 
 	# start ide	
 	(singularity exec \
- 		--pwd "/proj/" \
+ 		--pwd "/proj" \
  		"instance://${ins_name}" \
  		jupyter lab \
         --ip=${address} \

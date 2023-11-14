@@ -32,6 +32,7 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
   export LANG="en_US.UTF-8"
   export LC_ALL="en_US.UTF-8"
   export TZ="Etc/UTC"
+  export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
   usr_scr_r="/usr/lib/usr_scr/install_pkgs_base.R" 
   total_cores="$(nproc)"
   available_cores="$(expr 2 + "${total_cores}" / 2)"
@@ -60,6 +61,7 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
     bash-completion \
     build-essential \
     ca-certificates \
+    cmake \
     curl \
     devscripts \
     emacs \
@@ -75,17 +77,23 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
     gsfonts \
     jq \
     libbz2-* \
+    libbz2-dev \
     libcurl4 \
     libcurl4-openssl-dev \
+    libmpfr-dev \
     libgdal-dev \
     libgit2-dev \
+    libgmp-dev \
     libgraphviz-dev \
     "libicu[0-9][0-9]" \
+    libicu-dev \
     libjpeg-turbo* \
     liblapack-dev \
     liblzma* \
+    liblzma-dev \
     libpangocairo-* \
-    libpcre2* \
+    libpcre2-8-0 \
+    libpcre2-dev \
     libpng16* \
     "libreadline${READLINE_VERSION}" \
     libpq-dev \
@@ -100,12 +108,15 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
     nano \
     openssh-client \
     openssh-server \
+    openjdk-11-jdk \
+    openjdk-11-jre \
     perl \
     psmisc \
     python3.8-dev \
     python3.8-venv \
     python3-pip \
     python3-wheel \
+    systemd \
     unzip \
     vim \
     wget \
@@ -120,17 +131,12 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
   /usr/sbin/update-locale --reset LANG="${LANG}"
   
   ## List of dependencies will will get removed at the end of R installation  
-  BUILDDEPS="default-jdk \
-      libbz2-dev \
-      libcairo2-dev \
+  BUILDDEPS="libcairo2-dev \
       libpango1.0-dev \
       libjpeg-dev \
-      libicu-dev \
-      libpcre2-dev \
       libpng-dev \
       libreadline-dev \
       libtiff5-dev \
-      liblzma-dev \
       libx11-dev \
       libxt-dev \
       rsync \
@@ -186,7 +192,10 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
   make -j "${available_cores}"
   make install
   make clean
-
+	
+  ## Configure R for rJava
+  R CMD javareconf
+  
   ## Install base packages
   if [ -x "${usr_scr_r}" ]; then
     Rscript "${usr_scr_r}" "${available_cores}"
@@ -214,7 +223,10 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
   
   # Add R paths
   export LC_ALL="en_US.UTF-8"
-
+  
+  # Java paths
+  export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+  
 %runscript
   #Executes when the "singularity run" command is used
   #Useful when you want the container to run as an executable
