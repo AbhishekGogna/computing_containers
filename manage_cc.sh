@@ -131,7 +131,7 @@ start_rstudio(){
 	start_instance
 	
 	# start ide
-	(DEBUG_AUTH_FILE=false \
+	(DEBUG_AUTH_FILE=true \
 	USER=$(whoami) \
 	RSTUDIO_PASSWORD="hello" \
 	singularity exec \

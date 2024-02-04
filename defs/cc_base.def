@@ -186,7 +186,11 @@ From: nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
   make -j "${available_cores}"
   make install
   make clean
-
+  
+  ## Install rJava
+  apt-get update -y
+  apt-get install -y --no-install-recommends r-cran-rjava
+  
   ## Install base packages
   if [ -x "${usr_scr_r}" ]; then
     Rscript "${usr_scr_r}" "${available_cores}"
